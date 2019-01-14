@@ -1,0 +1,82 @@
+javascript: (function jogos_arena_vision() {
+    var url_game = 'http://arenavision.us/';
+    var url_principal = 'http://arenavision.us/guide';
+    var url_parts = this.document.location.href.split('arenavision');
+
+    if (url_parts.length === 1) {
+        alert('Será redirecionado para uma nova página. \n Assim que estiver carregada carregue outra vez no botão.');
+        this.document.location.href = url_principal;
+    } else {
+        if (this.document.readyState === "complete") {
+            if (this.document.location.href === url_principal) {
+                var team = prompt("Escreva o nome de uma equipa que quer ver:", "benfica").toLowerCase();
+                if (team != null && team != "") {
+                    var games = [];
+
+                    var x = document.getElementsByTagName("td");
+                    for (var i = 0; i < x.length; i++) {
+                        x[i].childNodes.forEach(function(a) {
+                            if (a.nodeValue && a.nodeValue.includes('[POR]')) {
+                                if (x[i].previousSibling.previousSibling) {
+                                    x[i].previousSibling.previousSibling.childNodes.forEach(function(t) {
+                                        if (t.nodeValue && t.nodeValue.toLowerCase().includes(team)) {
+                                            games.push({
+                                                game: t.nodeValue,
+                                                channels: a.nodeValue.match(/\d+/g).map(Number)
+                                            });
+                                        }
+                                    });
+                                }
+
+                            }
+                        });
+                    }
+
+                    var game = '';
+                    for (let g of games) {
+                        if (confirm("É o jogo entre " + g.game + " que pretende ver?")) {
+                            game = g;
+                            break;
+                        }
+                    }
+
+                    if (!game) {
+                        jogos_arena_vision();
+                    } else {
+                        var menu = document.getElementsByClassName("menu");
+                        for (let ul of menu) {
+                            for (let li of ul.childNodes) {
+                                if (li.childNodes) {
+                                    for (let a of li.childNodes) {
+                                        if (a.textContent.replace('ArenaVision ', '') == game.channels[0]) {
+                                            var url = a.href;
+                                            document.location.href = url;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                	var elms = document.getElementsByClassName("leaf")[game.channels[1]].childNodes[0].getAttribute('href');
+                	var url = elms.split('?');
+                        document.location.href = url[0];
+                    }
+                }
+            } else {
+                if (typeof document.getElementsByClassName("auto-style1")[1] !== 'undefined') {
+                    var time = setTimeout(function() {
+                        if (confirm('O botão foi encontrado! Abrir o jogo?')) {
+                            window.open(document.getElementsByClassName("auto-style1")[1].childNodes[0].getAttribute('href'), "_self");
+                            clearTimeout(time);
+                        }
+                    }, 1000);
+                } else {
+                    alert('Página não contém o elemento para a sporttv em direto! \n Será redirecionado para uma nova página. \n Assim que estiver carregada carregue outra vez no botão.');
+                    this.document.location.href = url_principal;
+                }
+            }
+        } else {
+            alert('Página ainda não carregou completamente!');
+        }
+    }
+})();
